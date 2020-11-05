@@ -8,5 +8,9 @@ output
 data/coco
 backup
 weights/*.weights
+bin
+weights
+.ipynb_checkpoints
+*.zip
 __pycache__
 checkpoints
