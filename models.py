@@ -143,8 +143,18 @@ class YOLOLayer(nn.Module):
         num_samples = x.size(0)
         grid_size = x.size(2)
 
+        '''
         prediction = (
             x.view(num_samples, self.num_anchors, self.num_classes + 5, grid_size, grid_size)
+            .permute(0, 1, 3, 4, 2)
+            .contiguous()
+        )
+        '''
+        
+        #print('x_shape(before view):', x.shape)
+        
+        prediction = (
+            x.view(num_samples, self.num_anchors, self.num_classes + 5 + 11, grid_size, grid_size)
             .permute(0, 1, 3, 4, 2)
             .contiguous()
         )
@@ -154,9 +164,13 @@ class YOLOLayer(nn.Module):
         y = torch.sigmoid(prediction[..., 1])  # Center y
         w = prediction[..., 2]  # Width
         h = prediction[..., 3]  # Height
+        
         pred_conf = torch.sigmoid(prediction[..., 4])  # Conf
         pred_cls = torch.sigmoid(prediction[..., 5:])  # Cls pred.
 
+        #print('x, y, w, h: ', x.shape, y.shape, w.shape, h.shape)
+        #print('pred_conf, pred_cls: ', pred_conf.shape, pred_cls.shape)
+        
         # If grid size does not match current we compute new offsets
         if grid_size != self.grid_size:
             self.compute_grid_offsets(grid_size, cuda=x.is_cuda)
@@ -168,11 +182,22 @@ class YOLOLayer(nn.Module):
         pred_boxes[..., 2] = torch.exp(w.data) * self.anchor_w
         pred_boxes[..., 3] = torch.exp(h.data) * self.anchor_h
 
+        '''
         output = torch.cat(
             (
                 pred_boxes.view(num_samples, -1, 4) * self.stride,
                 pred_conf.view(num_samples, -1, 1),
-                pred_cls.view(num_samples, -1, self.num_classes),
+                pred_cls.view(num_samples, -1, self.num_classes + 11),
+            ),
+            -1,
+        )
+        '''
+        
+        output = torch.cat(
+            (
+                pred_boxes.view(num_samples, -1, 4) * self.stride,
+                pred_conf.view(num_samples, -1, 1),
+                pred_cls.view(num_samples, -1, self.num_classes + 11),
             ),
             -1,
         )

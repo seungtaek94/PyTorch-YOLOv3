@@ -1,0 +1,5 @@
+gpus=0,1
+classes=7
+train=data/axleDetection/train.txt
+valid=data/axleDetection/train.txt
+names=data/axleDetection/axleDetection.names

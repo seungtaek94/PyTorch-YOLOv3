@@ -5,10 +5,12 @@ build
 *.egg-info
 dist
 output
+data
 data/coco
 backup
 weights/*.weights
 bin
+logs
 weights
 .ipynb_checkpoints
 *.zip
